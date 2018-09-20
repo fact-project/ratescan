@@ -1,2 +1,2 @@
 # ratescan
-package analyse and evaluate ratescans from fact with python
+Package with methods to analyse and evaluate ratescans from fact with python
