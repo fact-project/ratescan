@@ -28,7 +28,7 @@ setup(
     zip_safe=False,
     entry_points={
         'console_scripts': [
-            # 'aict_train_separation_model = aict_tools.scripts.train_separation_model:main',
+            'ratescan_fit_and_plot_single_run = ratescan.executables.fitAndPlotSingleRatescan:main',
         ],
     }
 )
