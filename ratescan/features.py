@@ -29,6 +29,8 @@ def maxPossibleThreshold2Keep(
     df_tmp = groups.max()
     df_tmp.reset_index(inplace=True)
     
+    df_tmp.drop([event_num_key], axis=1, inplace=True)
+    
     # now we havethe max possible threshold to keep for each event. 
     # Next step is to find the event with the smallest possible threshold.
     group_keys = None
