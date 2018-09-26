@@ -4,6 +4,7 @@ import math as m
 from scipy.optimize import root, curve_fit
 
 from .models import *
+from .utils import *
 
 def maxPossibleThreshold2Keep(
         df,
