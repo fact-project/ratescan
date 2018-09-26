@@ -7,12 +7,13 @@ from .models import *
 
 def maxPossibleThreshold2Keep(
         df,
-        n_primitives = 1,
         counts_key = "ratescan_trigger_counts",
         thresholds_key = "ratescan_trigger_thresholds",
         event_num_key = "event_num",
         night_key = "night",
         run_id_key = "run_id",
+        max_possible_threshold_key = "max_possible_threshold_to_keep",
+        n_primitives = 1,
         ):
     """
     For a given dataframe with with columns event_keys, counts_key and 
