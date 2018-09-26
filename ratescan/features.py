@@ -43,14 +43,13 @@ def maxPossibleThreshold2Keep(
         return df_tmp
     else:
         return df_tmp.min()
-        
 
 def fit_given_range(df_ranged, thresholds_key, rate_key, func, p0=None):
     xdata = df_ranged[thresholds_key].values
     ydata = df_ranged[rate_key].values
         
     return curve_fit(func, xdata, ydata, p0=p0)
-        
+
 def fit_result_to_series(opt, cov, name="shower"):
     result = dict()
     for i, parameter in enumerate(opt):
@@ -65,6 +64,8 @@ def concatSeriesNamesToPrefix(series):
     for s in series:
         ss.append(s.add_prefix(s.name+"_"))
     return pd.concat(ss)
+
+    
 def findTriggerSetThreshold(
         df,
         max_threshold = 5000,
