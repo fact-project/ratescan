@@ -38,7 +38,8 @@ def maxPossibleThreshold2Keep(
     
     if group_keys:
         df_tmp = df_tmp.groupby(group_keys).min()
-        df_tmp.reset_index(inplace=True)
+        df_tmp.rename({thresholds_key: max_possible_threshold_key}, inplace=True)
+        df_tmp = df_tmp.reset_index()
         return df_tmp
     else:
         return df_tmp.min()
