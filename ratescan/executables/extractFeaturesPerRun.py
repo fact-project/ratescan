@@ -105,7 +105,7 @@ def run(
     return df_result
 
 
-def make_jobs(infiles, key_dict, engine, queue, vmem, walltime, num_runs):
+def make_jobs(infiles, key_dict, engine, queue, vmem, walltime):
     jobs = []
     logger = logging.getLogger(__name__)
     logger.info("queue: {}".format(queue))
@@ -134,14 +134,13 @@ def make_jobs(infiles, key_dict, engine, queue, vmem, walltime, num_runs):
 @click.option('--queue', help='Name of the queue you want to send jobs to.', default='one_day')
 @click.option('--walltime', help='Estimated maximum walltime of your job in format hh:mm:ss.', default='02:00:00')
 @click.option('--engine', help='Name of the grid engine used by the cluster.', type=click.Choice(['PBS', 'SGE',]), default='PBS')
-@click.option('--num_runs', help='Number of num runs per bunch to start on the cluster.', default='4', type=click.INT)
 @click.option('--vmem', help='Amount of memory to use per node in MB.', default='10000', type=click.INT)
 @click.option('--chunksize', help='number of simultaneus submitted jobs.', default='0', type=click.INT)
 @click.option('--log_level', type=click.Choice(['INFO', 'DEBUG', 'WARN']), help='increase output verbosity', default='INFO')
 @click.option("--log_dir", type=click.Path(exists=False, dir_okay=True, file_okay=False, readable=True), help='Directory to store output from m gridmap jobs', default=None)
 @click.option('--port', help='The port through which to communicate with the JobMonitor', default=None, type=int)
 @click.option('--local', default=False,is_flag=True,   help='Flag indicating whether jobs should be executed localy .')
-def main(infiles, outfile, outkey, queue, walltime, engine, num_runs, vmem, chunksize, log_level, log_dir, port, local):
+def main(infiles, outfile, outkey, queue, walltime, engine, vmem, chunksize, log_level, log_dir, port, local):
     """
     run over list of jsonl files convert each line to pandas df and dump it to HDF5
     """
@@ -156,7 +155,7 @@ def main(infiles, outfile, outkey, queue, walltime, engine, num_runs, vmem, chun
     
     
     for infile in partitions:
-        jobs = make_jobs(infile, default_key_dict, engine, queue, vmem, walltime, num_runs)
+        jobs = make_jobs(infile, default_key_dict, engine, queue, vmem, walltime)
 
         log.info("Submitting {} jobs".format(len(jobs)))
 
