@@ -19,14 +19,17 @@ def maxPossibleThreshold2Keep(
     For a given dataframe with with columns event_keys, counts_key and 
     thresholds_key get per night and run_id the value of the highest possilble 
     trigger threshold to trigger n_primitives,
+    
+    return value is either a data frame with several runs or a single value in case only one run was provided
     """
     event_keys = [event_num_key, run_id_key, night_key]
     
-    # Get all events with one triggering patch
+    # Get all events with n_primitives triggering patches
     df_tmp = df[df[counts_key] == n_primitives]
-    
     groups = df_tmp[[*event_keys, thresholds_key]].groupby(event_keys)
+    
     df_tmp = groups.max()
+    
     df_tmp.reset_index(inplace=True)
     
     df_tmp.drop([event_num_key], axis=1, inplace=True)
