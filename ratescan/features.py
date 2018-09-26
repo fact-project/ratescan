@@ -63,19 +63,22 @@ def findTriggerSetThreshold(
     """
     max_rate = df[rate_key].max()
     
-    fit_results = dict()
+    ranges_dict = dict()
     
-    fit_results["max_rate"] = max_rate
+    ranges_dict["max_rate"] = max_rate
         
-    fit_results["max_threshold"] = max_threshold
-    fit_results["nsb_rate_max"] = max_rate*0.6
-    fit_results["nsb_rate_min"] = max_rate*0.1
-    fit_results["shower_rate_max"] = fit_results["nsb_rate_min"]/2
+    ranges_dict["max_threshold"] = max_threshold
+    ranges_dict["nsb_rate_max"] = max_rate*0.6
+    ranges_dict["nsb_rate_min"] = max_rate*0.1
+    ranges_dict["shower_rate_max"] = ranges_dict["nsb_rate_min"]/2
     
-    filter_shower_thresh_min = df[rate_key] < fit_results["shower_rate_max"]
-    filter_shower_thresh_max = df[thresholds_key] < fit_results["max_threshold"]
-    filter_nsb_thresh_min = df[rate_key] < fit_results["nsb_rate_max"]
-    filter_nsb_thresh_max = df[rate_key] > fit_results["nsb_rate_min"]
+    filter_shower_thresh_min = df[rate_key] < ranges_dict["shower_rate_max"]
+    filter_shower_thresh_max = df[thresholds_key] < ranges_dict["max_threshold"]
+    filter_nsb_thresh_min = df[rate_key] < ranges_dict["nsb_rate_max"]
+    filter_nsb_thresh_max = df[rate_key] > ranges_dict["nsb_rate_min"]
+    
+    s_fit_results = []
+    s_fit_results.append(pd.Series(ranges_dict, name="ranges"))
     
     filter_shower_range = np.logical_and(filter_shower_thresh_min, filter_shower_thresh_max)
     filter_nsb_range = np.logical_and(filter_nsb_thresh_min, filter_nsb_thresh_max)
