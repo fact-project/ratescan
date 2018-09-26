@@ -30,6 +30,7 @@ setup(
         'console_scripts': [
             'ratescan_fit_and_plot_single_run = ratescan.executables.fitAndPlotSingleRatescan:main',
             'ratescan_convert_json_to_hdf5_cluster = ratescan.executables.convertRatescansToHDF5_cluster:main',
+            'ratescan_extract_features_per_run = ratescan.executables.extractFeaturesPerRun:main',
         ],
     }
 )
