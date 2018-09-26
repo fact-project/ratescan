@@ -43,24 +43,6 @@ def maxPossibleThreshold2Keep(
     else:
         return df_tmp.min()
         
-def compileRatescanForRun(
-        df,
-        ontime=None,
-        rate_key = "ratescan_trigger_rate",
-        counts_key = "ratescan_trigger_counts",
-        thresholds_key = "ratescan_trigger_thresholds",
-        ):
-    """
-    Sum all rate counts for all thresholds for a given run. If a ontime is given
-    convert counts to rates
-    """
-    df_new = df[[counts_key, thresholds_key]].groupby(thresholds_key).sum()
-    
-    if ontime:
-        df_new[counts_key] /= ontime
-        df_new.rename(index=str, columns={counts_key: rate_key}, inplace=True)
- 
-    return df_new.reset_index()
 
 def fit_given_range(df_ranged, thresholds_key, rate_key, func, p0=None):
     xdata = df_ranged[thresholds_key].values
