@@ -50,6 +50,20 @@ def fit_given_range(df_ranged, thresholds_key, rate_key, func, p0=None):
         
     return curve_fit(func, xdata, ydata, p0=p0)
         
+def fit_result_to_series(opt, cov, name="shower"):
+    result = dict()
+    for i, parameter in enumerate(opt):
+        result["par_"+str(i)] = parameter
+    for i, row in enumerate(cov):
+        for j, num in enumerate(row):
+            result["cov_"+str(i)+"_"+str(j)] = num
+    return pd.Series(result, name=name)
+    
+def concatSeriesNamesToPrefix(series):
+    ss = []
+    for s in series:
+        ss.append(s.add_prefix(s.name+"_"))
+    return pd.concat(ss)
 def findTriggerSetThreshold(
         df,
         max_threshold = 5000,
@@ -92,7 +106,9 @@ def findTriggerSetThreshold(
         rate_key, 
         powerLaw,
         p0=[5.52310784e10, -3, 3.70127911e2])
-    fit_results["shower"] = dict( opt=shower_opt, cov=shower_cov)
+    s_fit_results.append(fit_result_to_series(shower_opt, shower_cov, name="shower"))
+    
+    
      
     nsb_opt, nsb_cov = fit_given_range(
         df[filter_nsb_range], 
@@ -100,7 +116,7 @@ def findTriggerSetThreshold(
         rate_key, 
         nsbContribution,
         p0=[-2.18757227e-2, 6.94879358e2])
-    fit_results["nsb"] = dict( opt=nsb_opt, cov=nsb_cov)
+    s_fit_results.append(fit_result_to_series(nsb_opt, nsb_cov, name="nsb"))
         
     full_opt, full_cov = fit_given_range(
         df[filter_full_range], 
@@ -108,7 +124,9 @@ def findTriggerSetThreshold(
         rate_key, 
         ratescan_func,
         p0=[*shower_opt, *nsb_opt])
-    fit_results["full"] = dict( opt=full_opt, cov=full_cov)
+    s_fit_results.append(fit_result_to_series(full_opt, full_cov, name="full"))
+    
+    s_fit_results = concatSeriesNamesToPrefix(s_fit_results)
     
     #estimate location
     estimatedThreshold = df[df[rate_key] <= max_rate*0.1][thresholds_key].dropna().first_valid_index()
@@ -116,7 +134,12 @@ def findTriggerSetThreshold(
     poly = lambda t: powerLaw(t, *full_opt[:3])/(m.e*scale) - nsbContribution(t, *full_opt[3:])
     solution = root(poly, estimatedThreshold)
     
-    return solution.x, fit_results
+    s_fit_results["setThreshold"] = solution.x
+    
+    if len(s_fit_results["setThreshold"]) == 1:
+        s_fit_results["setThreshold"] = s_fit_results["setThreshold"][0]
+    
+    return s_fit_results
     
     
     
