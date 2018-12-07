@@ -74,6 +74,7 @@ def sumUpAndConvertToRates(
                         counts_key="ratescan_trigger_counts", 
                         thresholds_key="ratescan_trigger_thresholds",
                         rates_key="ratescan_trigger_rates",
+                        normalize=False
                         ):
                         
     df_result = sumupCountsOfRun(
@@ -88,5 +89,9 @@ def sumUpAndConvertToRates(
                         run_id_key=run_id_key,
                         )
     
-    df_result[rates_key] = df_result[counts_key]/df_result['ontime']
+    df_result[rates_key] = df_result[counts_key]
+    if not normalize:
+        df_result[rates_key] /= df_result['ontime']
+    else:
+        df_result[rates_key] /= df_result['n_events_per_run']
     return df_result

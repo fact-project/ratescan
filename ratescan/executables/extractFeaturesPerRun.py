@@ -25,6 +25,7 @@ default_key_dict = dict(
     run_id_key = "run_id",
     counts_key = "ratescan_trigger_counts",
     thresholds_key = "ratescan_trigger_thresholds",
+    normalize=False,
     )
 
 def run(
@@ -80,6 +81,7 @@ def run(
                         counts_key=counts_key, 
                         thresholds_key=thresholds_key,
                         rates_key="ratescan_trigger_rates",
+                        normalize=key_dict['normalize'],
                         )
         
     logger.info("Extracting feature: ratescanTriggerSetThreshold")
@@ -157,6 +159,7 @@ def main(infiles, outfile, outkey, queue, walltime, engine, vmem, chunksize, log
     if mc:
         default_key_dict['night_key']  = "lons_night"
         default_key_dict['run_id_key'] = "lons_run_id"
+        default_key_dict['normalize'] = True
 
     for infile in partitions:
         jobs = make_jobs(infile, default_key_dict, engine, queue, vmem, walltime)
