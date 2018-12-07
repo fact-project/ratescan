@@ -11,8 +11,12 @@ def sumupCountsOfRun(
     
     df_summed = df[[counts_key, *group_keys]].groupby(group_keys).sum()
     df_summed = df_summed.reset_index()
-    
-    return df_summed
+
+    df_size = df[[counts_key, *group_keys]].groupby(group_keys).size()
+    df_size = df_size.to_frame(name='n_events_per_run')
+    df_size = df_size.reset_index()
+
+    return pd.merge(df_summed, df_size, how='left', on=group_keys, suffixes=['', '_nevents'])
 
 
 def compileRatescanForRun(
@@ -37,13 +41,13 @@ def compileRatescanForRun(
  
     return df_new
 
+
 def joinOnTimesFromRunDB(df,
                         night_key="night", 
                         run_id_key="run_id",
                         ):
     query = (
         RunInfo.select(
-    #         RunInfo,
             RunInfo.fnight.alias('night'),
             RunInfo.frunid.alias('run_id'),
             (
@@ -60,7 +64,8 @@ def joinOnTimesFromRunDB(df,
     
     df_run_db = read_into_dataframe(query)
     
-    return pd.merge(df,df_run_db, how='left', on=[night_key, run_id_key] )
+    return pd.merge(df, df_run_db, how='left', left_on=[night_key, run_id_key], right_on=['night', 'run_id'])
+
 
 def sumUpAndConvertToRates(
                         df,
@@ -77,7 +82,8 @@ def sumUpAndConvertToRates(
                     counts_key=counts_key, 
                     )
 
-    df_result = joinOnTimesFromRunDB(df_result,
+    df_result = joinOnTimesFromRunDB(
+                        df_result,
                         night_key=night_key, 
                         run_id_key=run_id_key,
                         )
