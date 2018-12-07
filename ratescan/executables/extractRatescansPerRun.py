@@ -109,8 +109,9 @@ def make_jobs(infiles, key_dict, engine, queue, vmem, walltime):
 @click.option('--log_level', type=click.Choice(['INFO', 'DEBUG', 'WARN']), help='increase output verbosity', default='INFO')
 @click.option("--log_dir", type=click.Path(exists=False, dir_okay=True, file_okay=False, readable=True), help='Directory to store output from m gridmap jobs', default=None)
 @click.option('--port', help='The port through which to communicate with the JobMonitor', default=None, type=int)
-@click.option('--local', default=False,is_flag=True,   help='Flag indicating whether jobs should be executed localy .')
-def main(infiles, outfile, outkey, queue, walltime, engine, vmem, chunksize, log_level, log_dir, port, local):
+@click.option('--local', default=False, is_flag=True,   help='Flag indicating whether jobs should be executed localy .')
+@click.option('--mc', default=False, is_flag=True,   help='Flag indicating whether input files are mcs.')
+def main(infiles, outfile, outkey, queue, walltime, engine, vmem, chunksize, log_level, log_dir, port, local, mc):
     """
     run over list of jsonl files convert each line to pandas df and dump it to HDF5
     """
@@ -122,6 +123,10 @@ def main(infiles, outfile, outkey, queue, walltime, engine, vmem, chunksize, log
         partitions = np.array_split(infiles, 1+len(infiles)//chunksize)
     else:
         partitions = np.array_split(infiles, 1)
+
+    if mc:
+        default_key_dict['night_key']  = "lons_night"
+        default_key_dict['run_id_key'] = "lons_run_id"
 
     for infile in partitions:
         jobs = make_jobs(infile, default_key_dict, engine, queue, vmem, walltime)
