@@ -34,7 +34,7 @@ def compileRatescanForRun(
     Sum all rate counts for all thresholds for a given run. If a ontime is given
     convert counts to rates
     """
-    df_new = sumupCountsOfRun(df, group_keys=[thresholds_key], counts_key=counts_key)
+    df_new = sumupCountsOfRun(df, thresholds_key=thresholds_key, counts_key=counts_key)
     
     if ontime:
         df_new[rate_key] = df_new[counts_key]/ontime
