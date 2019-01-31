@@ -34,6 +34,7 @@ setup(
             'ratescan_extract_per_run = ratescan.executables.extractRatescansPerRun:main',
             'ratescan_concat_runs = ratescan.executables.concatRatescans:main',
             'ratescan_determine_sw_trigger_event_list = ratescan.executables.determine_sw_trigger_event_list:main',
+            'ratescan_applyTrigger = ratescan.executables.applyTrigger:main',
         ],
     }
 )
