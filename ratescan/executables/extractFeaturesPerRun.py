@@ -95,6 +95,8 @@ def run(
             rate_key = "ratescan_trigger_rates", 
             thresholds_key=thresholds_key,
             )
+        if s_fit_results is None:
+            continue
         s_fit_results[night_key] = night
         s_fit_results[run_id_key] = run_id
 
