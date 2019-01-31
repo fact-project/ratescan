@@ -39,12 +39,12 @@ def run(
     logger = logging.getLogger(__name__)
     logger.info("stream runner has been started.")
     
-    inkey = "ratescan" if "inkey" not in key_dict.keys() else key_dict["inkey"]
-    night_key = "night" if "night_key" not in key_dict.keys() else key_dict["night_key"]
-    event_num_key = "event_num" if "event_num_key" not in key_dict.keys() else key_dict["event_num_key"]
-    run_id_key = "run_id" if "run_id" not in key_dict.keys() else key_dict["run_id"]
-    counts_key = "ratescan_trigger_counts" if "counts_key" not in key_dict.keys() else key_dict["counts_key"]
-    thresholds_key = "ratescan_trigger_thresholds" if "thresholds_key" not in key_dict.keys() else key_dict["thresholds_key"]
+    inkey = key_dict["inkey"] if "inkey" in key_dict.keys() else "ratescan"
+    night_key = key_dict["night_key"] if "night_key" in key_dict.keys() else "night"
+    event_num_key = key_dict["event_num_key"] if "event_num_key" in key_dict.keys() else "event_num"
+    run_id_key = key_dict["run_id_key"] if "run_id_key"  in key_dict.keys() else "run_id"
+    counts_key = key_dict["counts_key"] if "counts_key"  in key_dict.keys() else "ratescan_trigger_counts"
+    thresholds_key = key_dict["thresholds_key"] if "thresholds_key" in key_dict.keys() else "ratescan_trigger_thresholds"
 
     relevant_keys= [night_key, event_num_key, run_id_key, counts_key, thresholds_key]
     
