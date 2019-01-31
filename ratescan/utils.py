@@ -4,15 +4,17 @@ from peewee import SQL, fn
 import pandas as pd
 
 def sumupCountsOfRun(
-        df, 
-        group_keys=["night", "run_id", "ratescan_trigger_thresholds"],
-        counts_key="ratescan_trigger_counts", 
-        ):
+        df,
+        group_keys=["night", "run_id"],
+        counts_key="ratescan_trigger_counts",
+        thresholds_key="ratescan_trigger_thresholds"
+):
     
-    df_summed = df[[counts_key, *group_keys]].groupby(group_keys).sum()
+    df_summed = df[[counts_key, thresholds_key, *group_keys]].groupby(group_keys+[thresholds_key]).sum()
     df_summed = df_summed.reset_index()
 
-    df_size = df[[counts_key, *group_keys]].groupby(group_keys).size()
+    df_zero = df[df[thresholds_key] == 0][[counts_key, *group_keys]]
+    df_size = df_zero[[counts_key, *group_keys]].groupby(group_keys).size()
     df_size = df_size.to_frame(name='n_events_per_run')
     df_size = df_size.reset_index()
 
@@ -77,11 +79,8 @@ def sumUpAndConvertToRates(
                         normalize=False
                         ):
                         
-    df_result = sumupCountsOfRun(
-                    df, 
-                    group_keys=[night_key, run_id_key, thresholds_key],
-                    counts_key=counts_key, 
-                    )
+    df_result = sumupCountsOfRun(df, group_keys=[night_key, run_id_key],
+                                 thresholds_key=thresholds_key, counts_key=counts_key)
 
     df_result = joinOnTimesFromRunDB(
                         df_result,
