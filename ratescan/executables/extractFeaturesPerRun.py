@@ -157,7 +157,6 @@ def main(infiles, outfile, outkey, queue, walltime, engine, vmem, chunksize, log
     """
 
     log.info("Putting ratescans from json files into hdf5 file")
-    open_func = open
     
     if chunksize > 0:
         partitions = np.array_split(infiles, 1+len(infiles)//chunksize)
