@@ -33,4 +33,4 @@ def readJsonLtoDf(infile_path, default_keys_to_store=None):
             dfs.append(df)
             # lines+=1
     
-    return pd.concat(dfs)
+    return pd.concat(dfs, ignore_index=True)
