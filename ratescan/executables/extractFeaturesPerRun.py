@@ -88,6 +88,8 @@ def run(
     ss = []
     
     for k, ((night, run_id), group) in enumerate(df_ratescans.groupby([night_key, run_id_key])):
+        if len(group) == 0:
+            continue
         s_fit_results = findTriggerSetThreshold(
             group,
             rate_key = "ratescan_trigger_rates", 
