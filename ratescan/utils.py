@@ -40,6 +40,32 @@ def compileRatescanForRun(
     return df_new
 
 
+def append_current_at_start_from_run_db(df,
+                                        night_key="night",
+                                        run_id_key="run_id",
+                                        current_key='current_at_start',
+                                        ):
+    query = (
+        RunInfo.select(
+            RunInfo.fnight.alias('night'),
+            RunInfo.frunid.alias('run_id'),
+            RunInfo.fcurrentsmedmeanbeg.alias(current_key)
+        )
+            .where(RunInfo.fnight >= df[night_key].min())
+            .where(RunInfo.fnight <= df[night_key].max())
+            .where(RunInfo.frunid >= df[run_id_key].min())
+            .where(RunInfo.frunid <= df[run_id_key].max())
+    )
+
+    # This necessary so the FACT DB does not go bananas
+    sleep(randint(10, 5 * 60))
+
+    df_run_db = read_into_dataframe(query)
+
+    return pd.merge(df, df_run_db, how='left', left_on=[night_key, run_id_key], right_on=['night', 'run_id'],
+                    suffixes=('', '_run_info'))
+
+
 def joinOnTimesFromRunDB(df,
                         night_key="night", 
                         run_id_key="run_id",
