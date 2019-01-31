@@ -121,3 +121,10 @@ def sumUpAndConvertToRates(
     else:
         df_result[rates_key] /= df_result['n_events_per_run']
     return df_result
+
+
+def to_numeric_if_possible(val):
+    try:
+        return pd.to_numeric(val)
+    except ValueError:
+        return val
