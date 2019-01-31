@@ -32,6 +32,7 @@ setup(
             'ratescan_convert_json_to_hdf5_cluster = ratescan.executables.convertRatescansToHDF5_cluster:main',
             'ratescan_extract_features_per_run = ratescan.executables.extractFeaturesPerRun:main',
             'ratescan_extract_per_run = ratescan.executables.extractRatescansPerRun:main',
+            'ratescan_concat_runs = ratescan.executables.concatRatescans:main',
         ],
     }
 )
