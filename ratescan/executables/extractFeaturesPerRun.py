@@ -138,8 +138,8 @@ def make_jobs(infiles, key_dict, engine, queue, vmem, walltime):
 
 
 @click.command()
-@click.argument('infiles', nargs=-1, type=click.Path(exists=True, dir_okay=False, file_okay=True, readable=True) )
-@click.argument('outfile', type=click.Path(exists=False, dir_okay=False, file_okay=True, readable=True) )
+@click.argument('infiles', nargs=-1, type=click.Path(exists=True, dir_okay=False, file_okay=True, readable=True))
+@click.argument('outfile', type=click.Path(exists=False, dir_okay=False, file_okay=True, readable=True))
 @click.option('--outkey', help='Key of the data base in the hdf file', default="ratescan")
 @click.option('--queue', help='Name of the queue you want to send jobs to.', default='one_day')
 @click.option('--walltime', help='Estimated maximum walltime of your job in format hh:mm:ss.', default='02:00:00')
