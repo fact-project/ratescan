@@ -150,8 +150,9 @@ def main(infiles, outfile, outkey, queue, walltime, engine, vmem, chunksize, log
 
         job_outputs = process_jobs(**job_arguments)
 
-        for df in tqdm(job_outputs):
-            write_data(df, outfile, key=outkey, mode="a")
+        for k, df in tqdm(enumerate(job_outputs)):
+            mode = 'w' if k < 1 else "a"
+            write_data(df, outfile, key=outkey, mode=mode, index=False)
 
 
 if __name__ == '__main__':
