@@ -1,10 +1,15 @@
 import numpy as np
 import pandas as pd
+import logging
 import math as m
 from scipy.optimize import root, curve_fit
 
-from .models import *
-from .utils import *
+from .models import (powerLaw, nsbContribution, ratescan_func)
+
+logging.basicConfig(format='%(asctime)s|%(levelname)s|%(message)s',
+                    datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
+log = logging.getLogger(__name__)
+
 
 def maxPossibleThreshold2Keep(
         df,
@@ -51,11 +56,20 @@ def maxPossibleThreshold2Keep(
     else:
         return df_tmp.min()
 
+
 def fit_given_range(df_ranged, thresholds_key, rate_key, func, p0=None):
     xdata = df_ranged[thresholds_key].values
     ydata = df_ranged[rate_key].values
-        
-    return curve_fit(func, xdata, ydata, p0=p0)
+
+    if (len(xdata) < 3) or (len(ydata) < 3):
+        return [None, None]
+
+    try:
+        return curve_fit(func, xdata, ydata, p0=p0)
+    except RuntimeError:
+        log.warning("Fit failed: Optimal parameters not found")
+        return [None, None]
+
 
 def fit_result_to_series(opt, cov, name="shower"):
     result = dict()
