@@ -102,13 +102,17 @@ def run(
 
         ss.append(s_fit_results)
 
-    df_ratescan_fits = pd.concat(ss, axis=1).T
-    
-    df_result = pd.merge(df_thresholds, df_ratescan_fits, how="inner", on=[night_key, run_id_key])
-    
-    df_result["infile_path"] = infile_path
-    
-    return df_result
+    try:
+        df_ratescan_fits = pd.concat(ss, axis=1).T
+        df_ratescan_fits = df_ratescan_fits.apply(to_numeric_if_possible, axis=0)
+
+        df_result = pd.merge(df_thresholds, df_ratescan_fits, how="inner", on=[night_key, run_id_key])
+
+        df_result["infile_path"] = infile_path
+
+        return df_result
+    except ValueError:
+        return pd.DataFrame()
 
 
 def make_jobs(infiles, key_dict, engine, queue, vmem, walltime):
