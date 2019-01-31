@@ -2,6 +2,8 @@ from fact.factdb import RunInfo
 from fact.factdb.utils import read_into_dataframe
 from peewee import SQL, fn
 import pandas as pd
+from random import randint
+from time import sleep
 
 def sumupCountsOfRun(
         df,
@@ -85,7 +87,10 @@ def joinOnTimesFromRunDB(df,
         .where(RunInfo.frunid >= df[run_id_key].min())
         .where(RunInfo.frunid <= df[run_id_key].max())
     )
-    
+
+    # This necessary so the FACT DB does not go bananas
+    sleep(randint(10, 5*60))
+
     df_run_db = read_into_dataframe(query)
     
     return pd.merge(df, df_run_db, how='left', left_on=[night_key, run_id_key], right_on=['night', 'run_id'])
