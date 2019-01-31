@@ -9,6 +9,7 @@ import os
 from tqdm import tqdm
 
 from gridmap import Job, process_jobs
+import gc
 
 from ..utils import *
 from ..io import readJsonLtoDf
@@ -18,38 +19,42 @@ logging.basicConfig(format='%(asctime)s|%(levelname)s|%(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 log = logging.getLogger(__name__)
 
-default_key_dict = dict(
-    inkey = "ratescan",
-    night_key = "night",
-    event_num_key = "event_num",
-    run_id_key = "run_id",
-    counts_key = "ratescan_trigger_counts",
-    thresholds_key = "ratescan_trigger_thresholds",
-    normalize = False,
-    )
+default_common_cols = [
+    "event_num",
+    "run_id",
+    "ratescan_trigger_counts",
+    "ratescan_trigger_thresholds",
+]
 
-def run(
-        infile_path,
-        key_dict=default_key_dict,
-        ):
+default_sim_cols = [
+    'corsika_event_header_event_number',
+    'corsika_run_header_run_number',
+    'lons_run_id', 'lons_night', 'lons_event_num'
+]
+
+default_obs_cols =[
+    "night",
+    ]
+
+
+
+def run(infile_path, inkey=None, key_list=None):
     '''
     This is what will be executed on the cluster an will do extraction of
     ratescans
+    :param inkey:
     '''
     logger = logging.getLogger(__name__)
     logger.info("stream runner has been started.")
-    
-    inkey = "ratescan" if "inkey" not in key_dict.keys() else key_dict["inkey"]
-    night_key = "night" if "night_key" not in key_dict.keys() else key_dict["night_key"]
-    event_num_key = "event_num" if "event_num_key" not in key_dict.keys() else key_dict["event_num_key"]
-    run_id_key = "run_id" if "run_id" not in key_dict.keys() else key_dict["run_id"]
-    counts_key = "ratescan_trigger_counts" if "counts_key" not in key_dict.keys() else key_dict["counts_key"]
-    thresholds_key = "ratescan_trigger_thresholds" if "thresholds_key" not in key_dict.keys() else key_dict["thresholds_key"]
 
-    relevant_keys= [night_key, event_num_key, run_id_key, counts_key, thresholds_key]
+    if inkey is None:
+        inkey = "ratescan"
+
+    if key_list is None:
+        key_list = default_common_cols + default_obs_cols
     
     if infile_path.endswith("json.gz") or infile_path.endswith("json"):
-        df = readJsonLtoDf(infile_path, default_keys_to_store=relevant_keys)
+        df = readJsonLtoDf(infile_path, default_keys_to_store=key_list)
     elif infile_path.endswith("hdf") or infile_path.endswith("hdf5"):
         df = read_data(infile_path, key=inkey)
     else:
@@ -61,7 +66,7 @@ def run(
     return df
 
 
-def make_jobs(infiles, key_dict, engine, queue, vmem, walltime):
+def make_jobs(infiles, engine, queue, vmem, walltime, key_list=None, inkey=None):
     jobs = []
     logger = logging.getLogger(__name__)
     logger.info("queue: {}".format(queue))
@@ -71,11 +76,11 @@ def make_jobs(infiles, key_dict, engine, queue, vmem, walltime):
     for num, infile in enumerate(infiles):
         jobs.append(
            Job(run,
-               [infile, key_dict],
+               [infile, inkey, key_list],
                queue=queue,
                walltime=walltime,
                engine=engine,
-               name="{}_ratescan_feature_extract".format(num),
+               name="{}_ratescan_concat".format(num),
                mem_free='{}mb'.format(vmem)
                )
            )
@@ -110,13 +115,14 @@ def main(infiles, outfile, outkey, queue, walltime, engine, vmem, chunksize, log
     else:
         partitions = np.array_split(infiles, 1)
 
+    key_list = default_common_cols
     if mc:
-        default_key_dict['night_key']  = "lons_night"
-        default_key_dict['run_id_key'] = "lons_run_id"
-        default_key_dict['normalize'] = True
+        key_list += default_sim_cols
+    else:
+        key_list += default_obs_cols
 
     for infile in partitions:
-        jobs = make_jobs(infile, default_key_dict, engine, queue, vmem, walltime)
+        jobs = make_jobs(infile, engine, queue, vmem, walltime, key_list)
 
         log.info("Submitting {} jobs".format(len(jobs)))
 
@@ -134,8 +140,14 @@ def main(infiles, outfile, outkey, queue, walltime, engine, vmem, chunksize, log
 
         job_outputs = process_jobs(**job_arguments)
 
-        for df in tqdm(job_outputs):
-            write_data(df, outfile, key=outkey, mode="a")
+        for k, df in tqdm(enumerate(job_outputs)):
+            mode = 'w' if k < 1 else "a"
+            write_data(df, outfile, key=outkey, mode=mode, index=False)
+            del df
+            gc.collect()
+
+        del job_outputs
+        gc.collect()
 
 
 if __name__ == '__main__':
