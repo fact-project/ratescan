@@ -79,7 +79,8 @@ def fit_result_to_series(opt, cov, name="shower"):
         for j, num in enumerate(row):
             result["cov_"+str(i)+"_"+str(j)] = num
     return pd.Series(result, name=name)
-    
+
+
 def concatSeriesNamesToPrefix(series):
     ss = []
     for s in series:
@@ -129,40 +130,52 @@ def findTriggerSetThreshold(
         rate_key, 
         powerLaw,
         p0=[5.52310784e10, -3, 3.70127911e2])
+    if (shower_opt is None) or (shower_cov is None):
+        return None
+
     s_fit_results.append(fit_result_to_series(shower_opt, shower_cov, name="shower"))
-    
-    
-     
+
     nsb_opt, nsb_cov = fit_given_range(
-        df[filter_nsb_range], 
-        thresholds_key, 
-        rate_key, 
+        df[filter_nsb_range],
+        thresholds_key,
+        rate_key,
         nsbContribution,
         p0=[-2.18757227e-2, 6.94879358e2])
+    if (nsb_opt is None) or (nsb_cov is None):
+        return None
+
     s_fit_results.append(fit_result_to_series(nsb_opt, nsb_cov, name="nsb"))
-        
+
     full_opt, full_cov = fit_given_range(
-        df[filter_full_range], 
-        thresholds_key, 
-        rate_key, 
+        df[filter_full_range],
+        thresholds_key,
+        rate_key,
         ratescan_func,
         p0=[*shower_opt, *nsb_opt])
+
+    if (full_opt is None) or (full_cov is None):
+        return None
+
     s_fit_results.append(fit_result_to_series(full_opt, full_cov, name="full"))
     
     s_fit_results = concatSeriesNamesToPrefix(s_fit_results)
-    
+
     #estimate location
     estimatedThreshold = df[df[rate_key] <= max_rate*0.1][thresholds_key].dropna().first_valid_index()
-    
-    poly = lambda t: powerLaw(t, *full_opt[:3])/(m.e*scale) - nsbContribution(t, *full_opt[3:])
-    solution = root(poly, estimatedThreshold)
-    
-    s_fit_results["setThreshold"] = solution.x
-    
-    if len(s_fit_results["setThreshold"]) == 1:
-        s_fit_results["setThreshold"] = s_fit_results["setThreshold"][0]
-    
-    return s_fit_results
+
+    if full_opt is not None:
+        poly = lambda t: powerLaw(t, *full_opt[:3])/(m.e*scale) - nsbContribution(t, *full_opt[3:])
+        solution = root(poly, estimatedThreshold)
+
+        s_fit_results["setThreshold"] = solution.x
+
+        if len(s_fit_results["setThreshold"]) == 1:
+            s_fit_results["setThreshold"] = s_fit_results["setThreshold"][0]
+
+        return s_fit_results
+    else:
+        return None
+
     
     
     
